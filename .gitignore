@@ -1,0 +1,11 @@
+node_modules/
+.wrangler/
+dist/
+.env*
+.dev.vars*
+wrangler.generated.json
+*.sqlite*
+*.db
+*backup*.json
+private/
+.DS_Store
