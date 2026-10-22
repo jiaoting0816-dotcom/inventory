@@ -11,14 +11,11 @@
     {
       "binding": "DB",
       "database_name": "merch-inventory",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "1ec81d8d-0304-48ea-acc9-e109964c14d5",
       "migrations_dir": "migrations"
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "BUCKET",
-      "bucket_name": "merch-inventory-images"
-    }
-  ]
+  "vars": {
+    "ADMIN_SETUP_HASH": "a59e238f8e608d3f10eaa05ba5f5c6f72db9c2043f99330639b3e0b0c06fc06e"
+  }
 }

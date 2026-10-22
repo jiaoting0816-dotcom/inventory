@@ -1,0 +1,5 @@
+// Small-test image storage. Chunked TEXT avoids oversized D1 rows.
+export function imageStore(db){return {
+ async put(key,bytes,options){if(bytes.length>2250000)throw Error('图片超过2.25MB限制');let binary='';for(let i=0;i<bytes.length;i+=16384)binary+=String.fromCharCode(...bytes.subarray(i,i+16384));let encoded=btoa(binary),queries=[db.prepare('INSERT INTO media(key,content_type,size) VALUES(?,?,?)').bind(key,options?.httpMetadata?.contentType||'image/jpeg',bytes.length)];for(let i=0,n=0;i<encoded.length;i+=131072,n++)queries.push(db.prepare('INSERT INTO media_chunks(media_key,part,data) VALUES(?,?,?)').bind(key,n,encoded.slice(i,i+131072)));await db.batch(queries)},
+ async get(key){let info=await db.prepare('SELECT content_type,size FROM media WHERE key=?').bind(key).first();if(!info)return null;let chunks=await db.prepare('SELECT data FROM media_chunks WHERE media_key=? ORDER BY part').bind(key).all();let encoded=chunks.results.map(x=>x.data).join('');return {body:Uint8Array.from(atob(encoded),c=>c.charCodeAt(0)),httpMetadata:{contentType:info.content_type}}}
+}}

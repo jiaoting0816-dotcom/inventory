@@ -1,4 +1,4 @@
-export async function isOwnerSetup(value,expected){return typeof value==='string'&&typeof expected==='string'&&expected.length>=32&&same(await hash(value),await hash(expected))}
+export async function isOwnerSetup(value,expected){return typeof value==='string'&&typeof expected==='string'&&/^[a-f0-9]{64}$/.test(expected)&&same(await hash(value),expected)}
 export const random=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
 export async function hash(value){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),b=>b.toString(16).padStart(2,'0')).join('')}
 export async function passwordHash(password,salt){let key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);let bytes=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:100000,hash:'SHA-256'},key,256);return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('')}

@@ -9,3 +9,6 @@ wrangler.generated.json
 *backup*.json
 private/
 .DS_Store
+
+# Never publish the administrator bootstrap secret
+private/
