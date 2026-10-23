@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS shared_assets (
+ id TEXT PRIMARY KEY,
+ payload TEXT NOT NULL,
+ active INTEGER NOT NULL DEFAULT 1,
+ created_at INTEGER NOT NULL
+);
