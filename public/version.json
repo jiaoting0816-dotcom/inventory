@@ -1,1 +1,1 @@
-{"version": "2.0.0", "date": "2026-10-23", "features": ["simple-intake", "bulk-preview", "private-finance-preferences", "shared-card-library"]}
+{"version": "2.1.0", "date": "2026-10-24", "features": ["simple-intake", "bulk-preview", "private-finance-preferences", "shared-card-library", "collapsed-series", "reserved-stock", "nagoya-import-compatibility"]}
