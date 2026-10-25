@@ -4,7 +4,7 @@ const text=(v,n=150)=>{if(typeof v!=='string'||!v.trim()||v.length>n)fail('卡�
 export function validateCardPackage(p){
  if(p?.format!=='merch-card-package-v1'||!Array.isArray(p.groups)||!p.groups.length||p.groups.length>100)fail('请选择卡图入库包（最多100组）');
  text(p.id);const keys=new Set();
- for(const g of p.groups){if(g.mode!==undefined&&!['attach-images','complete-images'].includes(g.mode))fail('卡图包操作无效');for(const a of [g.series_aliases||[],g.role_aliases||[]]){if(!Array.isArray(a)||a.length>10)fail('匹配名称无效');a.forEach(v=>text(v))}text(g.key);if(keys.has(g.key))fail('卡图包存在重复组');keys.add(g.key);for(const k of ['name','category','series','ip'])text(g[k]);
+ for(const g of p.groups){if(g.mode!==undefined&&!['attach-images','complete-images','replace-images'].includes(g.mode))fail('卡图包操作无效');for(const a of [g.series_aliases||[],g.role_aliases||[]]){if(!Array.isArray(a)||a.length>10)fail('匹配名称无效');a.forEach(v=>text(v))}text(g.key);if(keys.has(g.key))fail('卡图包存在重复组');keys.add(g.key);for(const k of ['name','category','series','ip'])text(g[k]);
   if(!Array.isArray(g.members)||!g.members.length||g.members.length>10||new Set(g.members).size!==g.members.length)fail('卡图成员无效');g.members.forEach(x=>text(x));
   let total=0;for(const m of g.members){const q=g.member_quantities?.[m],k=g.keep_quantities?.[m]??0;if(!Number.isSafeInteger(q)||q<0||q>1000000||!Number.isSafeInteger(k)||k<0||k>q)fail('数量或自留数量无效');total+=q}if(!total&&!g.mode)fail('组库存必须大于零');
   for(const obj of [g.member_quantities,g.keep_quantities||{},g.member_images||{}])if(!obj||typeof obj!=='object'||Array.isArray(obj)||Object.keys(obj).some(k=>!g.members.includes(k)))fail('成员映射不一致');
@@ -13,10 +13,10 @@ export function validateCardPackage(p){
  return p;
 }
 export function applyCardGroup(state,packageId,g){
- if(g.mode==='complete-images'){
+ if(g.mode==='complete-images'||g.mode==='replace-images'){
   const matches=state.items.filter(i=>i.category===g.category&&i.series===g.series&&i.ip.toLowerCase()===g.ip.toLowerCase());if(matches.length!==1)fail('请核对补图组合：'+g.name);
   const item=matches[0],old=JSON.parse(item.members||'[]');if(old.some(m=>!g.members.includes(m)))fail('补图包缺少已有成员');
-  const images=JSON.parse(item.member_images||'{}');let changed=false;for(const [m,url] of Object.entries(g.member_images||{})){if(!images[m]){images[m]=url;changed=true}}
+  const images=JSON.parse(item.member_images||'{}');let changed=false;for(const [m,url] of Object.entries(g.member_images||{})){if(!images[m]||g.mode==='replace-images'&&images[m]!==url){images[m]=url;changed=true}}
   const members=[...old,...g.members.filter(m=>!old.includes(m))];if(members.length!==old.length){changed=true;const choices=state.catalog.filter(c=>c.category===g.category&&c.series===g.series&&c.role.toLowerCase()===g.ip.toLowerCase());for(const c of choices)c.members=JSON.stringify(members);item.members=JSON.stringify(members)}
   item.member_images=JSON.stringify(images);return {status:changed?'images':'skipped',name:g.name,qty:0,keep:0};
  }
