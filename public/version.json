@@ -1,1 +1,1 @@
-{"version": "2.1.0", "date": "2026-10-24", "features": ["simple-intake", "bulk-preview", "private-finance-preferences", "shared-card-library", "collapsed-series", "reserved-stock", "nagoya-import-compatibility"]}
+{"version":"2.2.0","date":"2026-10-25","features":["订单金额修改和历史记录","成员图片入库包","自留保护和断点续传"]}
