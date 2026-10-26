@@ -6,7 +6,7 @@ import {validateBackup} from './backup.mjs';
 import { env } from 'cloudflare:workers';
 
 
-import { mutate } from './inventory.mjs';
+import { mutate,previewBulkSale } from './inventory.mjs';
 import {isOwnerSetup,random,hash,passwordHash,same,credentials,emptyState,ownsImage,accountInfo,rateLimit,sessionAccount,newSession} from './accounts.mjs';
 
 const json=(x:any,status=200,headers:any={})=>Response.json(x,{status,headers:{'Cache-Control':'no-store',...headers}});
@@ -46,6 +46,7 @@ export async function POST(req:Request){let url=new URL(req.url),path=url.pathna
  if(path==='accounts/status'){let target=await d.prepare('SELECT role FROM accounts WHERE id=?').bind(String(body.id)).first();if(!target||target.role==='owner'||!['active','disabled'].includes(body.status))throw Error('不能更改该账号');await d.batch([d.prepare('UPDATE accounts SET status=? WHERE id=?').bind(body.status,body.id),d.prepare('DELETE FROM sessions WHERE account_id=?').bind(body.id)]);return json({ok:true})}
  return json({error:'未知操作'},404)}
 
+ if(path==='bulk-sale-new/preview')return json(previewBulkSale(JSON.parse(a.payload),body));
  if(path==='bulk-sales/preview')return json(salesPreview(JSON.parse(a.payload),body));
  if(path==='bulk-cost/preview')return json(financePreview(JSON.parse(a.payload),body));
  if(path==='library/publish'){if(a.role!=='owner')return json({error:'仅管理员可分享卡图'},403);if(!Array.isArray(body.ids)||!body.ids.length||body.ids.length>100)throw Error('每次选择1至100组卡图');let state=JSON.parse(a.payload),records=[],existing=(await d.prepare('SELECT * FROM shared_assets').all()).results;for(let id of [...new Set(body.ids)]){let item=state.items.find(i=>i.id===id);if(!item)throw Error('物品不存在');let p=sharedRecord(item);if(!p.image&&!Object.values(JSON.parse(p.member_images)).some(Boolean))throw Error('选中物品没有图片');for(let v of [p.image,...Object.values(JSON.parse(p.member_images))])if(v&&!String(v).startsWith('/api/media/')&&!String(v).startsWith('data:image/'))throw Error('该卡图已来自共享库，无需重复分享');let matches=existing.filter(r=>{let old=JSON.parse(r.payload);return old.category===p.category&&old.series===p.series&&old.ip.toLowerCase()===p.ip.toLowerCase()});if(matches.length){for(const row of matches)records.push(d.prepare('UPDATE shared_assets SET payload=? WHERE id=?').bind(JSON.stringify(replaceSharedImages(JSON.parse(row.payload),p)),row.id));let chosen=matches.find(r=>r.active)||matches[0];records.push(d.prepare('UPDATE shared_assets SET active=1 WHERE id=?').bind(chosen.id))}else{let payload=JSON.stringify(p),key=await hash(payload);records.push(d.prepare('INSERT INTO shared_assets(id,payload,active,created_at) VALUES(?,?,1,?) ON CONFLICT(id) DO UPDATE SET active=1').bind(key,payload,Date.now()))}}for(let n=0;n<records.length;n+=25)await d.batch(records.slice(n,n+25));return json({ok:true,count:records.length})}
