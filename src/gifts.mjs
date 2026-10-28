@@ -17,3 +17,9 @@ export function giftMove(s,r){
  }
  c.gift_events.push({key:r.request_key,at:new Date().toISOString(),action:r.action,item_id,member,qty,cost,cost_known:known,note:r.note.trim()});Object.assign(s,c);
 }
+export function giftBulk(s,r){
+ if(!/^[a-zA-Z0-9-]{16,80}$/.test(r.request_key||''))throw Error('请求标识无效');
+ if(s.gift_events?.some(e=>e.key===r.request_key+'-0'))return;
+ if(!Array.isArray(r.rows)||!r.rows.length||r.rows.length>100||new Set(r.rows.map(x=>+x.id)).size!==r.rows.length)throw Error('请选择1至100个不同批次');
+ const c=structuredClone(s);r.rows.forEach((row,n)=>giftMove(c,{id:row.id,qty:row.qty,action:'transfer',note:r.note,request_key:r.request_key+'-'+n}));Object.assign(s,c);
+}
