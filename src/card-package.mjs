@@ -43,7 +43,7 @@ export function applyCardGroup(state,packageId,g){
  if(state.items.some(i=>i.import_key===key))return {status:'skipped',name:g.name,qty:0,keep:0};
  if(state.items.some(i=>i.name===g.name||i.category===g.category&&i.series===g.series&&i.ip.toLowerCase()===g.ip.toLowerCase()))fail('已存在同名款式，请核对避免重复入库：'+g.name);
  const members=JSON.stringify(g.members);let choice=state.catalog.find(c=>c.category===g.category&&c.series===g.series&&c.role.toLowerCase()===g.ip.toLowerCase());
- if(choice&&choice.members!==members)fail('现有分类成员顺序不同，请先核对：'+g.name);
+ if(choice&&choice.members!==members){let old=JSON.parse(choice.members||'[]');if(old.some(m=>!g.members.includes(m))||old.join('|')!==g.members.filter(m=>old.includes(m)).join('|'))fail('现有分类成员顺序不同，请先核对：'+g.name);choice.members=members;}
  if(!choice)state.catalog.push({category:g.category,series:g.series,role:g.ip,members});
  mutate(state,'intake',{rows:[{name:g.name,category:g.category,series:g.series,ip:g.ip,member_quantities:g.member_quantities,keep_qty:g.members.map(m=>g.keep_quantities?.[m]||0).join('-'),note:String(g.note||'').slice(0,1000)}]});
  let item=state.items.at(-1);item.member_images=JSON.stringify(g.member_images||{});item.import_key=key;
