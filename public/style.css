@@ -40,3 +40,11 @@ main{width:calc(100% - 232px);max-width:none;padding:36px clamp(20px,3vw,48px) 2
 
 /* Compact orders and stock adjustment */
 .compact-order{margin-bottom:6px;border-radius:8px}.order-summary{display:grid;grid-template-columns:80px 95px minmax(140px,1fr) 55px 115px 115px 55px;gap:10px;align-items:center;padding:10px 12px;cursor:pointer;list-style:none;font-size:13px}.order-summary::-webkit-details-marker{display:none}.order-members{overflow-wrap:anywhere;color:#64745e}.compact-order .sales-order-heading{padding:8px 12px}.compact-order .sales-member,.compact-order .sales-order-totals{padding:8px 12px}.order-content{border-top:1px solid #e5eade}.adjust-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center;margin:12px 0}.adjust-grid input{min-width:0;width:100%}.adjust-log{padding:10px 0;border-bottom:1px solid #e5eade}.adjust-log p{margin:5px 0}.stock-history{margin:14px 0}.stock-history summary{cursor:pointer}@media(max-width:1050px){.order-summary{grid-template-columns:75px 90px 1fr}.order-members{grid-column:1/-1;grid-row:2}.order-summary>span:last-child{text-align:right}}
+/* Public pool intake: compact member cards, including multi-version groups. */
+#poolMembers > .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px}
+#poolMembers label{display:flex;flex-direction:column;gap:6px;padding:10px;background:#f6f8f3;border:1px solid #dce3d6;border-radius:10px}
+#poolMembers label img{align-self:center;width:64px!important;height:88px!important}
+#poolMembers label span{height:88px;display:grid;place-items:center;color:#7a8874;font-size:12px}
+#poolTotal{grid-column:1/-1;margin:0;font-weight:600}
+.allocation-panel{border-top:1px solid #e0e5dc;margin-top:18px;padding-top:12px}
+.allocation-panel p{font-size:13px;line-height:1.6}
