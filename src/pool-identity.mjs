@@ -7,3 +7,5 @@ export function poolIdentity(id,p){
  const saved=p.identity||registry[id], names=JSON.parse(p.members||'[]');
  return {pool_id:saved?.pool_id||'pool-'+id,cp_id:saved?.cp_id||'cp-'+roleIdentity(p.ip),variants:(names.length?names:['']).map(m=>({id:saved?.variants?.[m]||id+':member:'+encodeURIComponent(m),member_id:'member-'+encodeURIComponent(normalize(m)||'default'),name:m}))};
 }
+
+export function roleAliases(value){return aliases[roleIdentity(value)]||[value]}

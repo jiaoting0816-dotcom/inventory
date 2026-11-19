@@ -1,7 +1,7 @@
 // Account-specific display preferences are stored in the account payload, not localStorage.
 function financeVisible(){return db?.preferences?.showFinance===true}
-function costText(amount,known=true){return known?yuan(amount):'未记录'}
-function profitText(s){return s.cost_known===false?'未计算（成本未记录）':yuan(s.revenue-s.cost)}
+function costText(amount,known=true){return known?yuan(amount):'待补'}
+function profitText(s){return s.cost_known===false?'待核算（成本待补）':yuan(s.revenue-s.cost)}
 function stockCost(i){let m=metrics(i);return costText(m.cost,!m.b.some(b=>b.remaining>0&&b.cost_known===false))}
 function downloadFile(name,content,type='text/csv;charset=utf-8'){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 function saveViewSettings(){accountPanel('录入与显示设置',`<form id="viewSettings"><label>默认录入方式<select name="entryMode"><option value="simple">简易录入 · 名称和数量即可</option><option value="detailed">详细录入 · 固定分类和成员数量</option></select></label><label class="check-line"><input type="checkbox" name="showFinance" ${financeVisible()?'checked':''}>显示成本与利润</label><p class="hint">关闭后，页面和普通 CSV 隐藏成本与利润。完整备份仍包含所有数据。未记录成本的物品不会计算利润。</p><button class="primary">保存设置</button></form>`);let f=$('#viewSettings');f.elements.entryMode.value=db.preferences?.entryMode||'detailed';f.onsubmit=async e=>{e.preventDefault();try{await post('/api/preferences',{entryMode:f.elements.entryMode.value,showFinance:f.elements.showFinance.checked});accountDialog.close();await load();toast('设置已保存，仅影响你的账号')}catch(err){$('#accountError').textContent=err.message}}}

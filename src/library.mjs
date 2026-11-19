@@ -1,7 +1,7 @@
-import {poolIdentity,sameRole,roleIdentity} from './pool-identity.mjs';
+import {poolIdentity,sameRole,roleIdentity,roleAliases} from './pool-identity.mjs';
 // Shared records deliberately exclude owner inventory, amounts, notes and locations.
 export function sharedRecord(item){return {category:item.category,series:item.series,ip:item.ip,members:item.members,image:item.image||'',member_images:item.member_images||'{}'}}
-export function publicAsset(row){const p=JSON.parse(row.payload),imgs=JSON.parse(p.member_images);return {id:row.id,...poolIdentity(row.id,p),category:p.category,series:p.series,ip:p.ip,members:p.members,image:p.image?`/api/library-media/${row.id}/cover`:'',member_images:JSON.stringify(Object.fromEntries(Object.keys(imgs).filter(k=>imgs[k]).map((k,n)=>[k,`/api/library-media/${row.id}/member-${n}`]))),active:row.active}}
+export function publicAsset(row){const p=JSON.parse(row.payload),imgs=JSON.parse(p.member_images);return {id:row.id,search_aliases:roleAliases(p.ip),...poolIdentity(row.id,p),category:p.category,series:p.series,ip:p.ip,members:p.members,image:p.image?`/api/library-media/${row.id}/cover`:'',member_images:JSON.stringify(Object.fromEntries(Object.keys(imgs).filter(k=>imgs[k]).map((k,n)=>[k,`/api/library-media/${row.id}/member-${n}`]))),active:row.active}}
 export function assetImage(row,part){let p=JSON.parse(row.payload);if(part==='cover')return p.image;let keys=Object.keys(JSON.parse(p.member_images)).filter(k=>JSON.parse(p.member_images)[k]);let index=Number(part.replace('member-',''));return /^member-\d+$/.test(part)?JSON.parse(p.member_images)[keys[index]]:null}
 export function applyAsset(row,asset){return {...row,shared_id:asset.id,name:row.name||asset.series+' · '+asset.ip,category:asset.category,series:asset.series,ip:asset.ip,_asset:asset}}
 // Keep image slots stable: other accounts may already reference member-N URLs.
