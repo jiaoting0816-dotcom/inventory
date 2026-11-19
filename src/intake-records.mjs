@@ -1,5 +1,4 @@
 // Intake receipts and compatibility are independent of historical stock allocation.
-export function compatible(item,asset){try{return JSON.stringify([...JSON.parse(item.members)].sort())===JSON.stringify([...JSON.parse(asset.members)].sort())}catch{return false}}
 export function intakeIssue(row,index,reason,member){const chosen=member??Object.entries(row.member_quantities||{}).filter(([,q])=>String(q)!=='0'&&String(q)!=='').map(([m])=>m).join(' / ');return {index,shared_id:row.shared_id||'',series:row.series||row.context?.series||'',ip:row.ip||row.context?.ip||'',member:chosen||row.context?.member||'',variant_id:row.context?.variant_id||'',reason}}
 export function intakeError(issues){return Object.assign(Error('本批全部未保存，填写内容已保留'),{issues})}
 export function quantityIssues(row,index){const out=[];if(row.member_quantities&&typeof row.member_quantities==='object')for(const[m,q]of Object.entries(row.member_quantities)){if(!/^\d+$/.test(String(q))||!Number.isSafeInteger(+q)||+q>1000000)out.push(intakeIssue(row,index,'数量须为 0–1000000 的整数',m))}return out}

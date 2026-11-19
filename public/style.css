@@ -48,3 +48,4 @@ main{width:calc(100% - 232px);max-width:none;padding:36px clamp(20px,3vw,48px) 2
 #poolTotal{grid-column:1/-1;margin:0;font-weight:600}
 .allocation-panel{border-top:1px solid #e0e5dc;margin-top:18px;padding-top:12px}
 .allocation-panel p{font-size:13px;line-height:1.6}
+.summary-card{border:1px solid #dce3d7;border-radius:8px;padding:10px;margin:10px 0}.summary-card summary{cursor:pointer;font-weight:600}.summary-card-image{max-width:100px;max-height:145px;margin-top:10px;object-fit:contain}.summary-source{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #eee}.summary-source span{flex:1;min-width:160px}@media(max-width:600px){.summary-card{padding:8px}.summary-source button{font-size:12px}.summary-card th,.summary-card td{min-width:90px}}
