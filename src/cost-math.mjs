@@ -1,0 +1,3 @@
+// Amounts are integer cents. Never multiply a rounded per-card average.
+export function costPortion(total,quantity,whole){if(![total,quantity,whole].every(Number.isSafeInteger)||total<0||quantity<0||whole<=0||quantity>whole)throw Error('成本分摊数量或金额无效');return Number((BigInt(total)*BigInt(quantity)+BigInt(Math.floor(whole/2)))/BigInt(whole))}
+export function splitCost(total,weights){const whole=weights.reduce((n,q)=>n+q,0);if(!whole)throw Error('无法分摊零数量');let cumulative=0,last=0;return weights.map(q=>{cumulative+=q;const next=costPortion(total,cumulative,whole),part=next-last;last=next;return part})}
