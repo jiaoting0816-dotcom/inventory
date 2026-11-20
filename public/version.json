@@ -1,1 +1,1 @@
-{"version":"2.6.0","date":"2026-11-20","features":["独立批次成本与加权均价","按原购入数量补录实际成本","FIFO分摊与历史销售补录审计"]}
+{"version": "2.6.1", "date": "2026-11-21", "features": ["Compact CP/team card layout", "Draft-safe member and alias filters"]}
