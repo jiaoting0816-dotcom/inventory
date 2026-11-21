@@ -1,3 +1,4 @@
+import {previewBatchCorrection} from './batch-correction.mjs';
 import {inventorySummaries} from './inventory-summary.mjs';
 import {receiptFor} from './intake-records.mjs';
 import {sameRole,roleIdentity} from './pool-identity.mjs';
@@ -51,6 +52,9 @@ export async function POST(req:Request){let url=new URL(req.url),path=url.pathna
  if(path==='accounts/status'){let target=await d.prepare('SELECT role FROM accounts WHERE id=?').bind(String(body.id)).first();if(!target||target.role==='owner'||!['active','disabled'].includes(body.status))throw Error('不能更改该账号');await d.batch([d.prepare('UPDATE accounts SET status=? WHERE id=?').bind(body.status,body.id),d.prepare('DELETE FROM sessions WHERE account_id=?').bind(body.id)]);return json({ok:true})}
  return json({error:'未知操作'},404)}
 
+ if(body.expected_account_id&&body.expected_account_id!==a.id)return json({error:'登录账号已变化，请刷新后重试'},409);
+ if(path==='adjust-group/preview'||path==='gift-move/preview'){const state=JSON.parse(a.payload);mutate(state,path.replace('/preview',''),body);return json({ok:true})}
+ if(path==='correct-batch/preview')return json(previewBatchCorrection(JSON.parse(a.payload),body));
  if(path==='bulk-sale-new/preview')return json(previewBulkSale(JSON.parse(a.payload),body));
  if(path==='bulk-sales/preview')return json(salesPreview(JSON.parse(a.payload),body));
  if(path.startsWith('bulk-cost')&&body.expected_account_id&&body.expected_account_id!==a.id)return json({error:'登录账号已变化，请刷新后重新核对'},409);

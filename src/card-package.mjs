@@ -45,7 +45,7 @@ export function applyCardGroup(state,packageId,g){
  const members=JSON.stringify(g.members);let choice=state.catalog.find(c=>c.category===g.category&&c.series===g.series&&c.role.toLowerCase()===g.ip.toLowerCase());
  if(choice&&choice.members!==members){let old=JSON.parse(choice.members||'[]');if(old.some(m=>!g.members.includes(m))||old.join('|')!==g.members.filter(m=>old.includes(m)).join('|'))fail('现有分类成员顺序不同，请先核对：'+g.name);choice.members=members;}
  if(!choice)state.catalog.push({category:g.category,series:g.series,role:g.ip,members});
- mutate(state,'intake',{rows:[{name:g.name,category:g.category,series:g.series,ip:g.ip,member_quantities:g.member_quantities,keep_qty:g.members.map(m=>g.keep_quantities?.[m]||0).join('-'),note:String(g.note||'').slice(0,1000)}]});
+ mutate(state,'intake',{source:'package',rows:[{name:g.name,category:g.category,series:g.series,ip:g.ip,member_quantities:g.member_quantities,keep_qty:g.members.map(m=>g.keep_quantities?.[m]||0).join('-'),note:String(g.note||'').slice(0,1000)}]});
  let item=state.items.at(-1);item.member_images=JSON.stringify(g.member_images||{});item.import_key=key;
  return {status:'added',name:g.name,qty:Object.values(g.member_quantities).reduce((a,b)=>a+b,0),keep:Object.values(g.keep_quantities||{}).reduce((a,b)=>a+b,0)};
 }
