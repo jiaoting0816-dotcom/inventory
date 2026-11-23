@@ -16,6 +16,7 @@
     }
   ],
   "vars": {
-    "ADMIN_SETUP_HASH": "a59e238f8e608d3f10eaa05ba5f5c6f72db9c2043f99330639b3e0b0c06fc06e"
+    "ADMIN_SETUP_HASH": "a59e238f8e608d3f10eaa05ba5f5c6f72db9c2043f99330639b3e0b0c06fc06e",
+    "TEXT_MODEL_ENABLED": "true"
   }
 }

@@ -1,3 +1,6 @@
+import {modelFailure} from './text-model.mjs';
+import {validateTextDraft} from './text-intake-draft.mjs';
+import {organizeText} from './text-model.mjs';
 import {previewBatchCorrection} from './batch-correction.mjs';
 import {inventorySummaries} from './inventory-summary.mjs';
 import {receiptFor} from './intake-records.mjs';
@@ -20,6 +23,8 @@ export async function GET(req:Request){try{let path=new URL(req.url).pathname.sl
  if(path==='auth/status'){let owner=await db().prepare("SELECT value FROM settings WHERE key='owner'").first();return json({account:a?accountInfo(a):null,canSetup:!owner,ownerReady:!!owner})}
  if(!a)return json({error:'请登录后使用'},401);
  if(path==='account')return json(accountInfo(a));
+ if(path==='text-intake/config')return json({configured:!!(env as any).DEEPSEEK_API_KEY,enabled:(env as any).TEXT_MODEL_ENABLED==='true',daily_usd:1,monthly_usd:5});
+ if(path==='text-intake/status'){const key=new URL(req.url).searchParams.get('key')||'';const row=await db().prepare('SELECT status,result FROM text_model_requests WHERE account_id=? AND request_key=?').bind(a.id,key).first();return json(modelFailure(row)||(row?.status==='complete'?{draft:JSON.parse(row.result)}:{pending:!!row,missing:!row}))}
  if(path==='accounts'){if(a.role!=='owner')return json({error:'仅管理员可操作'},403);let rows=await db().prepare('SELECT id,username,display_name,role,status,created_at,last_seen FROM accounts ORDER BY created_at').all();let inv=await db().prepare('SELECT hash,label,created_at,expires,used_by,revoked FROM invites ORDER BY created_at DESC').all();return json({accounts:rows.results.map(accountInfo),invites:inv.results})}
  let state=JSON.parse(a.payload);
  if(path==='intake/history')return json(state.intake_receipts||[]);
@@ -53,6 +58,8 @@ export async function POST(req:Request){let url=new URL(req.url),path=url.pathna
  return json({error:'未知操作'},404)}
 
  if(body.expected_account_id&&body.expected_account_id!==a.id)return json({error:'登录账号已变化，请刷新后重试'},409);
+ if(path==='text-intake/organize'){if(!Array.isArray(body.pool_ids)||!body.pool_ids.length||body.pool_ids.length>5||body.pool_ids.some(x=>typeof x!=='string'))throw Error('请选择1至5个卡池');const all=(await d.prepare('SELECT * FROM shared_assets WHERE active=1').all()).results.map(publicAsset);const assets=all.filter(x=>body.pool_ids.includes(JSON.stringify([x.category,x.series])));return json(await organizeText({db:d,env,account:a.id,body,assets}))}
+ if(path==='text-intake/preview'){const assets=(await d.prepare('SELECT * FROM shared_assets WHERE active=1').all()).results.map(publicAsset);const preview=validateTextDraft(body.draft,assets,body.text);if(preview.issues.length)return json(preview,400);const state=JSON.parse(a.payload);mutate(state,'intake',{source:'text',rows:preview.rows.map(r=>applyAsset(r,assets.find(a=>a.id===r.shared_id)))});return json(preview)}
  if(path==='adjust-group/preview'||path==='gift-move/preview'){const state=JSON.parse(a.payload);mutate(state,path.replace('/preview',''),body);return json({ok:true})}
  if(path==='correct-batch/preview')return json(previewBatchCorrection(JSON.parse(a.payload),body));
  if(path==='bulk-sale-new/preview')return json(previewBulkSale(JSON.parse(a.payload),body));

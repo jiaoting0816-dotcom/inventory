@@ -8,6 +8,7 @@ export function previewBatchCorrection(s,r){
  const known=r.total_cost!=='';if(known&&(!/^\d+(\.\d{1,2})?$/.test(String(r.total_cost))||+r.total_cost>1e8))fail('批次总成本须为非负金额，最多两位小数');
  if(b.cost_known!==false&&!known)fail('已有成本不能清空为未知，请填写更正后的实际金额');
  if(typeof r.estimated!=='boolean'&&r.estimated!==undefined)fail('估算标记无效');
+ for(const k of ['purchase_source','batch_name'])if(r[k]!==undefined&&(typeof r[k]!=='string'||r[k].length>150))fail('来源和批次名称最多150字');
  const total=known?Math.round(+r.total_cost*100):0,qty=+r.qty;
  const family=[],visit=(node,seen=new Set())=>{if(seen.has(node.id))fail('来源批次关联循环');seen.add(node.id);family.push(node);for(const child of s.batches.filter(x=>x.source_batch_id===node.id)){if(child.item_id!==b.item_id)fail('来源批次归属不一致');visit(child,seen)}};visit(b);
  const ids=new Set(family.map(x=>x.id)),as=s.allocations.filter(a=>ids.has(a.batch_id)),gs=(s.gifts||[]).filter(g=>ids.has(g.batch_id));
@@ -27,6 +28,7 @@ export function previewBatchCorrection(s,r){
   children.forEach((c,i)=>distribute(c,parts[aa.length+2*gg.length+i]));
  }
  if(financial)distribute(b,total);
+ for(const k of ['purchase_source','batch_name'])if(r[k]!==undefined)after[k]=r[k].trim();
  const sales=[...new Set(allocations.map(a=>a.sale_id))].map(id=>{const old=s.sales.find(x=>x.id===id),aa=s.allocations.filter(a=>a.sale_id===id);return {id,before_cost:old.cost,before_known:old.cost_known!==false,revenue:old.revenue,cost:aa.reduce((n,a)=>n+(allocations.find(x=>x.sale_id===id&&x.batch_id===a.batch_id)?.cost??a.cost),0),cost_known:aa.every(a=>ids.has(a.batch_id)?known:s.batches.find(x=>x.id===a.batch_id).cost_known!==false)}});
  const token=JSON.stringify({b,as,gs,sales:s.sales.filter(x=>as.some(a=>a.sale_id===x.id)),related:s.batches.filter(x=>x.item_id===b.item_id)});
  return {token,before:structuredClone(b),after,batches,allocations,gifts,sales,financial};

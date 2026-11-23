@@ -1,1 +1,1 @@
-{"version": "2.7.0", "date": "2026-11-22", "features": ["Compact inventory detail operations", "Batch correction with cost impact preview and audit", "Idempotent inline intake and stock adjustment"]}
+{"version": "2.8.0.0", "date": "2026-11-24", "features": ["文字采购草稿与人工校对", "紧凑批次明细及来源更正", "全项目模型预算和安全重试"]}
