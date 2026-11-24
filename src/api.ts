@@ -1,3 +1,4 @@
+import {previewBatchDeletion} from './batch-deletion.mjs';
 import {validId,validatePrivatePool,ownerPrivateAssets} from './private-pools.mjs';
 import {modelFailure} from './text-model.mjs';
 import {validateTextDraft} from './text-intake-draft.mjs';
@@ -83,6 +84,7 @@ export async function POST(req:Request){let url=new URL(req.url),path=url.pathna
  if(path==='text-intake/organize'){if(!Array.isArray(body.pool_ids)||!body.pool_ids.length||body.pool_ids.length>5||body.pool_ids.some(x=>typeof x!=='string'))throw Error('请选择1至5个卡池');const all=(await d.prepare('SELECT * FROM shared_assets WHERE active=1').all()).results.map(publicAsset);const assets=all.filter(x=>body.pool_ids.includes(JSON.stringify([x.category,x.series])));return json(await organizeText({db:d,env,account:a.id,body,assets}))}
  if(path==='text-intake/preview'){const assets=(await d.prepare('SELECT * FROM shared_assets WHERE active=1').all()).results.map(publicAsset);const preview=validateTextDraft(body.draft,assets,body.text);if(preview.issues.length)return json(preview,400);const state=JSON.parse(a.payload);mutate(state,'intake',{source:'text',rows:preview.rows.map(r=>applyAsset(r,assets.find(a=>a.id===r.shared_id)))});return json(preview)}
  if(path==='adjust-group/preview'||path==='gift-move/preview'){const state=JSON.parse(a.payload);mutate(state,path.replace('/preview',''),body);return json({ok:true})}
+ if(path==='delete-batch/preview')return json(previewBatchDeletion(JSON.parse(a.payload),body));
  if(path==='correct-batch/preview')return json(previewBatchCorrection(JSON.parse(a.payload),body));
  if(path==='bulk-sale-new/preview')return json(previewBulkSale(JSON.parse(a.payload),body));
  if(path==='bulk-sales/preview')return json(salesPreview(JSON.parse(a.payload),body));

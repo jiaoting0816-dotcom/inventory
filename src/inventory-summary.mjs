@@ -22,11 +22,11 @@ export function inventorySummaries(state,assets=[]){
   // Keep private image overrides scoped to this account.
   for(const i of [...ordered].reverse())for(const v of i.variants||[]){const pic=images(i)[v.name];if(pic&&descriptors.has(v.id)&&!(String(i.pool_id||'').startsWith('private-')&&pic.startsWith('/api/private-media/')&&catalog.some(a=>a.variants?.some(x=>x.id===v.id))))descriptors.get(v.id).image=pic}
   const ids=sources.map(i=>i.id),bs=state.batches.filter(b=>ids.includes(b.item_id)),cards=[...descriptors.values()];
-  const resolveName=m=>cards.filter(c=>c.aliases.includes(m));
+  const resolveName=m=>cards.filter(c=>c.aliases?.includes(m));
   for(const b of bs){const link=(state.card_links||[]).filter(l=>l.batch_id===b.id).at(-1);let card=descriptors.get(link?.variant_id||b.variant_id);
    if(!card&&!b.variant_id&&!link&&b.member){const matches=resolveName(b.member);if(matches.length===1)card=matches[0]}
    if(!card){const pending=cards.some(c=>!c.legacy)||!b.member,key='legacy:'+JSON.stringify([b.member||'',pending]);card=cards.find(c=>c.id===key);if(!card){card={id:key,name:b.member||'未拆分',pending,legacy:true,image:sources.map(i=>images(i)[b.member]).find(Boolean)||'',batches:[]};cards.push(card)}}
-   card.batches.push({...b,original_member:b.member,display_member:card.name,pending:!!card.pending});
+   if(!b.deletion)card.batches.push({...b,original_member:b.member,display_member:card.name,pending:!!card.pending});
   }
   // Empty options belong to the style, never create another homepage row.
   if(!descriptors.size)for(const i of sources)for(const n of names(i))if(!cards.some(c=>c.name===n))cards.push({id:'legacy:'+n,name:n,legacy:true,image:images(i)[n]||'',batches:[]});

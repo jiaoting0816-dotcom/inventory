@@ -1,7 +1,7 @@
 import {splitCost,costPortion} from './cost-math.mjs';
 const fail=m=>{throw Error(m)};
 export function previewBatchCorrection(s,r){
- const b=s.batches.find(x=>x.id===+r.batch_id);if(!b)fail('批次不存在');
+ const b=s.batches.find(x=>x.id===+r.batch_id);if(!b)fail('批次不存在');if(b.deletion)fail('已删除批次不能更正');
  if(!/^\d+$/.test(String(r.qty))||+r.qty<1||+r.qty>1000000)fail('原购入数量须为1–1000000的整数');
  if(!/^\d{4}-\d{2}-\d{2}$/.test(r.date)||!Number.isFinite(Date.parse(r.date))||new Date(r.date).toISOString().slice(0,10)!==r.date)fail('购入日期无效');
  if(typeof r.note!=='string'||r.note.length>1000||typeof r.reason!=='string'||!r.reason.trim()||r.reason.length>1000)fail('请填写更正原因，备注及原因最多1000字');

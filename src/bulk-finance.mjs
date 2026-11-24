@@ -5,7 +5,7 @@ function shares(total,weights){let sum=weights.reduce((a,b)=>a+b,0),cum=0,prev=0
 export function financePreview(s,r){
  if(r.kind!=='cost')fail('无效金额操作');
  const itemIds=s.items.filter(i=>i.category===r.category&&i.series===r.series).map(i=>i.id);
- let rows=s.batches.filter(b=>itemIds.includes(b.item_id)&&b.cost_known===false);
+ let rows=s.batches.filter(b=>itemIds.includes(b.item_id)&&!b.deletion&&b.cost_known===false);
  if(r.ids!==undefined){if(!Array.isArray(r.ids)||!r.ids.length||r.ids.length>1000||new Set(r.ids).size!==r.ids.length||r.ids.some(id=>!rows.some(b=>b.id===id)))fail('请选择本系列待补成本批次；已有成本不能覆盖');rows=rows.filter(b=>r.ids.includes(b.id))}
  if(!rows.length)fail('该系列没有待补成本的批次');
  if(r.estimated!==undefined&&typeof r.estimated!=='boolean')fail('估算选项无效');
