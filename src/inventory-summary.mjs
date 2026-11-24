@@ -3,6 +3,8 @@ const names=i=>JSON.parse(i.members||'[]');
 const images=i=>JSON.parse(i.member_images||'{}');
 const product=i=>i.ip||i.name;
 export function sameStyle(a,b){
+ if((String(a.pool_id||'').startsWith('private-')||String(b.pool_id||'').startsWith('private-'))&&a.pool_id!==b.pool_id)return false;
+ if(String(a.pool_id||'').startsWith('private-')&&a.pool_id===b.pool_id&&a.cp_id===b.cp_id)return true;
  if(a.category!==b.category)return false;
  if(a.shared_id&&a.shared_id===(b.shared_id||b.id))return true;
  if(a.pool_id&&b.pool_id&&a.cp_id&&b.cp_id)return a.pool_id===b.pool_id&&a.cp_id===b.cp_id;
@@ -18,7 +20,7 @@ export function inventorySummaries(state,assets=[]){
   // Current catalog names win by fixed ID, historical names remain aliases for old batches.
   for(const a of [...catalog,...ordered])for(const v of a.variants||[]){let d=descriptors.get(v.id);if(!d){d={id:v.id,name:v.name,aliases:[],image:images(a)[v.name]||'',batches:[]};descriptors.set(v.id,d)}for(const alias of [v.name,...(v.aliases||[])])if(!d.aliases.includes(alias))d.aliases.push(alias)}
   // Keep private image overrides scoped to this account.
-  for(const i of [...ordered].reverse())for(const v of i.variants||[]){const pic=images(i)[v.name];if(pic&&descriptors.has(v.id))descriptors.get(v.id).image=pic}
+  for(const i of [...ordered].reverse())for(const v of i.variants||[]){const pic=images(i)[v.name];if(pic&&descriptors.has(v.id)&&!(String(i.pool_id||'').startsWith('private-')&&pic.startsWith('/api/private-media/')&&catalog.some(a=>a.variants?.some(x=>x.id===v.id))))descriptors.get(v.id).image=pic}
   const ids=sources.map(i=>i.id),bs=state.batches.filter(b=>ids.includes(b.item_id)),cards=[...descriptors.values()];
   const resolveName=m=>cards.filter(c=>c.aliases.includes(m));
   for(const b of bs){const link=(state.card_links||[]).filter(l=>l.batch_id===b.id).at(-1);let card=descriptors.get(link?.variant_id||b.variant_id);
